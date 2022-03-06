@@ -1,4 +1,4 @@
-package teach.meskills.holidays
+package teach.meskills.timetable
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

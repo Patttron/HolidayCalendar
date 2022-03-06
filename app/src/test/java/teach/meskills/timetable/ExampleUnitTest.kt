@@ -1,4 +1,4 @@
-package teach.meskills.holidays
+package teach.meskills.timetable
 
 import org.junit.Test
 

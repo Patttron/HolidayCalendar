@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "488343946331",
+    "firebase_url": "https://work-calendar-cc85c-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "work-calendar-cc85c",
+    "storage_bucket": "work-calendar-cc85c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488343946331:android:a223ec082198de3ec0eb7e",
+        "android_client_info": {
+          "package_name": "teach.meskills.timetable"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488343946331-ucuio7mll3ecdj2j8vu9m2ofu56kh79k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "teach.meskills.timetable",
+            "certificate_hash": "d36d3d6e6b200ab0772c68ec47267ee47db6e6bc"
+          }
+        },
+        {
+          "client_id": "488343946331-ts4nsa3tnihe3k146mner5fbhg785043.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd4DxvNS5nq2BC_nvo_PsPjrsqg93j8E8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488343946331-ts4nsa3tnihe3k146mner5fbhg785043.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
