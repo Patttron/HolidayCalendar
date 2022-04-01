@@ -12,8 +12,6 @@ data class HolidaysEntity(
     @PrimaryKey
     @ColumnInfo(name = "metaCode")
     val metaCode: Int,
-    @ColumnInfo(name = "holidaysDate")
-    val holidaysDate: Int,
     @ColumnInfo(name = "holidaysName")
     val holidaysName: String,
     @ColumnInfo(name = "descriptions")
@@ -21,7 +19,3 @@ data class HolidaysEntity(
     @ColumnInfo(name = "dateIso")
     val dateIso: String
 ): Parcelable
-//    @PrimaryKey(autoGenerate = true)
-//    @ColumnInfo(name = "id")
-//    var id: Int = 0
-//}

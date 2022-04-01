@@ -4,14 +4,12 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
-import teach.meskills.timetable.holidays.ContentRepository
-import teach.meskills.timetable.holidays.HolidaysEntity
 import java.lang.Exception
 
 class HolidaysViewModel(private val contentRepository: ContentRepository) : ViewModel() {
 
-    val holidays = MutableLiveData<List<HolidaysEntity>>()
-    val scope = CoroutineScope(Dispatchers.Main)
+    val holidaysLiveData = MutableLiveData<List<HolidaysEntity>>()
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     fun loadingData() {
         try {
@@ -19,7 +17,7 @@ class HolidaysViewModel(private val contentRepository: ContentRepository) : View
                 val response = withContext(Dispatchers.IO) {
                     contentRepository.downloadHolidays()
                 }
-                holidays.value = response
+                holidaysLiveData.value = response
                 Log.d("response", response.toString())
             }
 

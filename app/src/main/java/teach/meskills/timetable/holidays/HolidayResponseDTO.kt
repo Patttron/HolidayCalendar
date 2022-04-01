@@ -1,4 +1,4 @@
-package teach.meskills.timetable
+package teach.meskills.timetable.holidays
 
 import com.google.gson.annotations.SerializedName
 

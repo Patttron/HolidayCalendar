@@ -16,7 +16,6 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import teach.meskills.timetable.databinding.SignInFragmentBinding
-import teach.meskills.timetable.holidays.HolidaysFragment
 
 class SignInFragment : Fragment() {
 
@@ -36,7 +35,6 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         auth = Firebase.auth
-//        auth.currentUser
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
             try {
@@ -64,12 +62,12 @@ class SignInFragment : Fragment() {
         return GoogleSignIn.getClient(requireContext(), gso)
     }
 
-    fun signInWithGoogle() {
+    private fun signInWithGoogle() {
         val signIngClient = getClient()
         launcher.launch(signIngClient.signInIntent)
     }
 
-    fun firebaseAuthWithGoogle(idToken: String){
+    private fun firebaseAuthWithGoogle(idToken: String){
         val credential = GoogleAuthProvider.getCredential(idToken,null)
         auth.signInWithCredential(credential).addOnCompleteListener {
             if(it.isSuccessful){
@@ -78,7 +76,6 @@ class SignInFragment : Fragment() {
             }
             else {
                 Log.d("signin", "Google auth error")
-
             }
         }
     }
@@ -87,7 +84,7 @@ class SignInFragment : Fragment() {
         if(auth.currentUser != null){
             parentFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragmentContainer, HolidaysFragment.newInstance())
+                .replace(R.id.fragmentContainer, CalendarFragment.newInstance())
                 .commit()
         }
     }
