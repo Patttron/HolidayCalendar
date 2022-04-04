@@ -14,7 +14,7 @@ class HolidaysFragment : BaseFragment() {
 
     lateinit var auth: FirebaseAuth
     private lateinit var binding: HolidaysFragmentBinding
-      private val viewModule by viewModel<HolidaysViewModel>()
+    private val viewModel by viewModel<HolidaysViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,8 +32,8 @@ class HolidaysFragment : BaseFragment() {
         val layoutManager = LinearLayoutManager(requireContext())
         binding.holidaysRecycler.adapter = adapter
         binding.holidaysRecycler.layoutManager = layoutManager
-        viewModule.loadingData()
-        viewModule.holidaysLiveData.observe(viewLifecycleOwner) {
+        viewModel.loadingData()
+        viewModel.holidaysLiveData.observe(viewLifecycleOwner) {
             adapter.holidays = it
         }
     }

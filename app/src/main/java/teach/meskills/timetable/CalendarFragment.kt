@@ -41,10 +41,9 @@ class CalendarFragment: Fragment() {
         binding.calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
             parentFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragmentContainer, DateFragment.newInstance())
+                .replace(R.id.fragmentContainer, DateFragment.newInstance(year, month, dayOfMonth))
                 .addToBackStack(null)
                 .commit()
-
         }
     }
 

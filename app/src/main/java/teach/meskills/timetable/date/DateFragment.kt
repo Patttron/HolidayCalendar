@@ -2,23 +2,18 @@ package teach.meskills.timetable.date
 
 import android.os.Bundle
 import android.view.*
-import android.widget.ImageView
-import androidx.appcompat.app.ActionBar
-import androidx.appcompat.widget.Toolbar
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import teach.meskills.timetable.*
-import teach.meskills.timetable.R
 import teach.meskills.timetable.databinding.DateFragmentBinding
-import teach.meskills.timetable.holidays.HolidaysViewModel
 
 class DateFragment : BaseFragment(), RecyclerViewClickListener {
     lateinit var auth: FirebaseAuth
@@ -26,7 +21,6 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
     private lateinit var binding: DateFragmentBinding
     private val viewModel by viewModel<DateViewModel>()
     val myRef = Firebase.database.getReference("message")
-//    private val cast: CustomObj by lazy { arguments?.getSerializable("key") as CustomObj}
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,11 +40,12 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
         binding.save.setOnClickListener {
             if (binding.editTextMessage.text.isNotEmpty()) {
                 myRef.child(myRef.push().key ?: "some text")
-//            myRef.child(auth.currentUser?.uid.toString())
                     .setValue(
                         DateItem(
                             auth.currentUser?.displayName,
-                            binding.editTextMessage.text.toString()
+                            binding.editTextMessage.text.toString(),
+                            auth.currentUser?.uid,
+                            arguments
                         )
                     )
                 binding.editTextMessage.text.clear()
@@ -59,61 +54,66 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
             }
         }
 
-       viewModel.onChangeListener(myRef)
+        onChangeListener(myRef)
         val layoutManager = LinearLayoutManager(requireContext())
         binding.dateRecycler.adapter = adapter
         binding.dateRecycler.layoutManager = layoutManager
 
-        viewModel.dateItemLiveData.observe(viewLifecycleOwner){
-            adapter.dateItems = it
-        }
+//        viewModel.dateItemLiveData.observe(viewLifecycleOwner) {
+//            adapter.dateItems = it
+//        }
     }
 
+    fun onChangeListener(dRef: DatabaseReference) {
+        dRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val list = ArrayList<DateItem>()
+                for (s in snapshot.children) {
+                    val item = s.getValue(DateItem::class.java)
+                    if (item != null) {
+                        item.date = arguments
+                        item?.id = s.key
+                        item?.let { list.add(item) }
+                    }
+                }
+                adapter.dateItems = list
+//                dateItemLiveData.value = list
+            }
 
-//    fun onChangeListener(dRef: DatabaseReference) {
-//        dRef.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val list = ArrayList<DateItem>()
-//                for (s in snapshot.children) {
-//                    val item = s.getValue(DateItem::class.java)
-//                    if (item != null)
-//                        list.add(item)
-//                }
-//                adapter.dateItems = list
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {}
-//        })
-//    }
-
-    companion object {
-        fun newInstance() = DateFragment()
-//        fun newInstance(date: Long) = DateFragment().apply {
-//            arguments = bundleOf("date" to date)
-//        arguments = Bundle().apply {
-//            putSeriala()
-//            putString()
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     override fun onRecyclerViewClickListener(view: View, dateItem: DateItem) {
-
-        view.findViewById<ImageView>(R.id.delete_icon).setOnClickListener {
-
-            myRef.removeValue()
+        val options = arrayOf<CharSequence>(
+            "Delete",
+            "Cancel"
+        )
+        val builder = android.app.AlertDialog.Builder(view.context)
+        builder.setTitle("Delete Content")
+        builder.setItems(
+            options
+        ) { _, which ->
+            if (which == 0) {
+                viewModel.deleteItem(dateItem)
+            }
         }
+        builder.show()
+    }
 
-//        when (view.id) {
-//            R.id.delete_icon -> {
-//                EditAuthorDialogFragment(author).show(childFragmentManager, "")
-//            }
-//            R.id.button_delete -> {
-//                AlertDialog.Builder(requireContext()).also {
-//                    it.setTitle(getString(R.string.delete_confirmation))
-//                    it.setPositiveButton(getString(R.string.yes)) { dialog, which ->
-//                        viewModel.deleteAuthor(author)
-//                    }
-//                }.create().show()
-//            }
-//        }
+    companion object {
+
+        fun newInstance(year: Int, month: Int, day: Int) = DateFragment().apply {
+            arguments = Bundle().apply {
+                putInt("year", year)
+                putInt("month", month)
+                putInt("day", day)
+            }
+        }
     }
 }
+
+
+// fun newInstance(date: Long) = DateFragment().apply {
+//            arguments = bundleOf("date" to date)
+//        arguments = Bundle().apply {

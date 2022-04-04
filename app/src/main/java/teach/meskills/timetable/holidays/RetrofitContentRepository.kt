@@ -1,14 +1,12 @@
 package teach.meskills.timetable.holidays
 
 import android.util.Log
-import okhttp3.Request
-import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitContentRepository : ContentRepository {
 
-    private val mediaService: MediaService
+    private val holidayService: HolidayService
 
     init {
         val retrofit = Retrofit.Builder()
@@ -16,24 +14,24 @@ class RetrofitContentRepository : ContentRepository {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        mediaService = retrofit.create(MediaService::class.java)
+        holidayService = retrofit.create(HolidayService::class.java)
     }
 
     override suspend fun downloadHolidays(): List<HolidaysEntity> {
 
         return try {
-            val holidayMap = mediaService.loadMedia(API_KEY).response.holidays.map {
+            val holidayMap = holidayService.loadMedia().response.holidays.map {
                 HolidaysEntity(
                     metaCode = it.code,
                     holidaysName = it.name,
                     descriptions = it.description,
                     dateIso = it.date.iso
                 )
-            }.orEmpty()
+            }
             Log.d("holidayMap", holidayMap.toString())
             holidayMap
         } catch (e: java.lang.Exception) {
-            e.printStackTrace()
+            Log.d("holiday", e.printStackTrace().toString())
             return emptyList()
         }
     }

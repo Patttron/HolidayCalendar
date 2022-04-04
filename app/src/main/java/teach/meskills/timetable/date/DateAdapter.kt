@@ -16,9 +16,6 @@ import com.google.firebase.ktx.Firebase
 import teach.meskills.timetable.R
 
 
-//val textChangeListener: (name: String, value: String) -> Unit
-//                textChangeListener.invoke(item.userName.toString(), s.toString())
-
 class DateAdapter : RecyclerView.Adapter<ItemViewHolder>() {
     var listener: RecyclerViewClickListener? = null
     val database = Firebase.database
@@ -40,65 +37,44 @@ class DateAdapter : RecyclerView.Adapter<ItemViewHolder>() {
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         auth = Firebase.auth
-
         val item = dateItems[position]
-        holder.bind(item)
-//        holder.delete.setOnClickListener {
-//            val options = arrayOf<CharSequence>( // select any from the value
-//                "Delete",
-//                "Cancel"
-//            )
-//            val builder = AlertDialog.Builder(holder.itemView.context)
-//            builder.setTitle("Delete Content")
-//            builder.setItems(
-//                options
-//            ) { dialog, which -> // if delete option is choosed
-//                // then call delete function
-//                if (which == 0) {
-//                    listener?.onRecyclerViewClickListener(it, item)
-//                    delete(position)
-//                }
-//            }
-//            builder.show()
-//        }
+        holder.userName.text = auth.currentUser?.displayName.toString()
+        holder.userText.text = item.userText
+        holder.delete.setOnClickListener {
+            listener?.onRecyclerViewClickListener(it, item)
+        }
     }
 
     override fun getItemCount() = dateItems.size
 }
 
-private fun delete(position: Int) {
-    // creating a variable for our Database
-    // Reference for Firebase.
-//    val dbref = FirebaseDatabase.getInstance().reference.child("message")
-    val dbref = Firebase.database.getReference("message")
-    // we are use add listerner
-    // for event listener method
-    // which is called with query.
-    val query: Query = dbref.child(position.toString())
-    query.addListenerForSingleValueEvent(object : ValueEventListener {
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-            // remove the value at reference
-            dataSnapshot.ref.removeValue()
-        }
-
-        override fun onCancelled(databaseError: DatabaseError) {}
-    })
-}
+//private fun delete(position: Int) {
+//    // creating a variable for our Database
+//    // Reference for Firebase.
+////    val dbref = FirebaseDatabase.getInstance().reference.child("message")
+//    val dbref = Firebase.database.getReference("message")
+//    // we are use add listerner
+//    // for event listener method
+//    // which is called with query.
+//    val query: Query = dbref.child(position.toString())
+//    query.addListenerForSingleValueEvent(object : ValueEventListener {
+//        override fun onDataChange(dataSnapshot: DataSnapshot) {
+//            // remove the value at reference
+//            dataSnapshot.ref.removeValue()
+//        }
+//
+//        override fun onCancelled(databaseError: DatabaseError) {}
+//    })
+//}
 
 class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    var listener: RecyclerViewClickListener? = null
     var userText = view.findViewById<TextView>(R.id.user_text)
     var userName = view.findViewById<TextView>(R.id.user_name)
     val delete = view.findViewById<ImageView>(R.id.delete_icon)
-    val auth = Firebase.auth
 
-    fun bind(item: DateItem) {
-        userName.text = auth.currentUser?.displayName.toString()
-        userText.text = item.userText
-        delete.setOnClickListener {
-            listener?.onRecyclerViewClickListener(it, item)
-        }
-    }
+//    fun bind(item: DateItem) {
+//        userName.text = auth.currentUser?.displayName.toString()
+//        userText.text = item.userText
+//    }
 }
-//holder.view.button_delete.setOnClickListener {
-//    listener?.onRecyclerViewItemClicked(it, authors[position])
+
