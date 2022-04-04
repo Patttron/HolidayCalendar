@@ -3,8 +3,6 @@ package teach.meskills.timetable.holidays
 import com.google.gson.annotations.SerializedName
 
 class HolidayResponseDTO(
-//    @SerializedName("meta")
-//    val meta: Meta,
     @SerializedName("response")
     val response: Response
 )

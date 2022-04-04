@@ -21,6 +21,9 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
     private lateinit var binding: DateFragmentBinding
     private val viewModel by viewModel<DateViewModel>()
     val myRef = Firebase.database.getReference("message")
+    var year = 0
+    var month = 0
+    var day = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,7 +39,9 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
         auth = Firebase.auth
         adapter = DateAdapter()
         adapter.listener = this
-
+        year = requireArguments().getInt("year")
+        month = requireArguments().getInt("month")
+        day = requireArguments().getInt("day")
         binding.save.setOnClickListener {
             if (binding.editTextMessage.text.isNotEmpty()) {
                 myRef.child(myRef.push().key ?: "some text")
@@ -45,7 +50,7 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
                             auth.currentUser?.displayName,
                             binding.editTextMessage.text.toString(),
                             auth.currentUser?.uid,
-                            arguments
+                            year, month, day
                         )
                     )
                 binding.editTextMessage.text.clear()
@@ -53,15 +58,10 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
                 showToast("Enter some text")
             }
         }
-
         onChangeListener(myRef)
         val layoutManager = LinearLayoutManager(requireContext())
         binding.dateRecycler.adapter = adapter
         binding.dateRecycler.layoutManager = layoutManager
-
-//        viewModel.dateItemLiveData.observe(viewLifecycleOwner) {
-//            adapter.dateItems = it
-//        }
     }
 
     fun onChangeListener(dRef: DatabaseReference) {
@@ -71,13 +71,17 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
                 for (s in snapshot.children) {
                     val item = s.getValue(DateItem::class.java)
                     if (item != null) {
-                        item.date = arguments
-                        item?.id = s.key
-                        item?.let { list.add(item) }
+                        if (item.dateYear == year &&
+                            item.dateMonth == month &&
+                            item.dateDay == day
+                        ) {
+                            item.userName = auth.currentUser?.displayName
+                            item.id = s.key
+                            item.let { list.add(item) }
+                        }
                     }
                 }
                 adapter.dateItems = list
-//                dateItemLiveData.value = list
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -112,8 +116,3 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
         }
     }
 }
-
-
-// fun newInstance(date: Long) = DateFragment().apply {
-//            arguments = bundleOf("date" to date)
-//        arguments = Bundle().apply {
