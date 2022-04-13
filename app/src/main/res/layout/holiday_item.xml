@@ -64,7 +64,8 @@
                     android:clickable="false"
                     android:ellipsize="end"
                     android:gravity="center"
-                    android:lines="3"
+                    android:maxLines="4"
+                    android:minLines="2"
                     android:text="holidays_description"
                     android:textColor="@color/design_default_color_on_secondary"
                     android:textSize="14sp" />

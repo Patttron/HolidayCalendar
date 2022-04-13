@@ -11,16 +11,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import teach.meskills.timetable.databinding.SignInFragmentBinding
 
 class SignInFragment : Fragment() {
 
     lateinit var launcher: ActivityResultLauncher<Intent>
-    lateinit var auth: FirebaseAuth
     private lateinit var binding: SignInFragmentBinding
 
     override fun onCreateView(
@@ -34,7 +30,6 @@ class SignInFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        auth = Firebase.auth
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
             try {
@@ -47,7 +42,7 @@ class SignInFragment : Fragment() {
 
             }
         }
-        binding.button.setOnClickListener {
+        binding.signinButton.setOnClickListener {
             signInWithGoogle()
         }
         checkAuthState()
@@ -64,30 +59,33 @@ class SignInFragment : Fragment() {
 
     private fun signInWithGoogle() {
         val signIngClient = getClient()
+
         launcher.launch(signIngClient.signInIntent)
     }
 
     private fun firebaseAuthWithGoogle(idToken: String){
         val credential = GoogleAuthProvider.getCredential(idToken,null)
-        auth.signInWithCredential(credential).addOnCompleteListener {
+        AUTH.signInWithCredential(credential).addOnCompleteListener {
             if(it.isSuccessful){
                 checkAuthState()
                 Log.d("signin", "Google auth done")
             }
             else {
+                showToast("Some problem with connection")
                 Log.d("signin", "Google auth error")
             }
         }
     }
 
     private fun checkAuthState(){
-        if(auth.currentUser != null){
+        if(AUTH.currentUser != null){
             parentFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragmentContainer, CalendarFragment.newInstance())
                 .commit()
         }
     }
+
 
     companion object {
         fun newInstance() = SignInFragment()

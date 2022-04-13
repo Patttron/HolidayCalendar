@@ -3,6 +3,7 @@
     package="teach.meskills.timetable">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".di.WorkTimetableApplication"
         android:allowBackup="true"
@@ -13,8 +14,7 @@
         android:theme="@style/Theme.Holidays">
         <activity
             android:name="teach.meskills.timetable.MainActivity"
-            android:exported="true"
-            android:screenOrientation="portrait">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

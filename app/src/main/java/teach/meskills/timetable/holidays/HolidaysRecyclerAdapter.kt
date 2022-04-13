@@ -34,11 +34,10 @@ class AudioViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val holidaysName = view.findViewById<TextView>(R.id.holidays_name)
     private val descriptions = view.findViewById<TextView>(R.id.holidays_description)
     private val date = view.findViewById<TextView>(R.id.date)
-    
 
     fun input(holiday: HolidaysEntity) {
         holidaysName.text = holiday.holidaysName
         descriptions.text = holiday.descriptions
-        date.text = holiday.dateIso
+        date.text = "${holiday.holidayDateDay}-${holiday.holidayDateMonth}-${holiday.holidayDateYear}"
     }
 }

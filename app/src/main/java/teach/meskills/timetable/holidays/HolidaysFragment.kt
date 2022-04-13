@@ -12,7 +12,6 @@ import teach.meskills.timetable.databinding.HolidaysFragmentBinding
 
 class HolidaysFragment : BaseFragment() {
 
-    lateinit var auth: FirebaseAuth
     private lateinit var binding: HolidaysFragmentBinding
     private val viewModel by viewModel<HolidaysViewModel>()
 
@@ -27,7 +26,6 @@ class HolidaysFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        auth = Firebase.auth
         val adapter = RecyclerAdapter()
         val layoutManager = LinearLayoutManager(requireContext())
         binding.holidaysRecycler.adapter = adapter

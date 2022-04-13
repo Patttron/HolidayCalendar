@@ -5,10 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import teach.meskills.timetable.AUTH
 import teach.meskills.timetable.R
 
 class DateAdapter : RecyclerView.Adapter<ItemViewHolder>() {
@@ -30,7 +32,7 @@ class DateAdapter : RecyclerView.Adapter<ItemViewHolder>() {
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = dateItems[position]
         holder.bind(item)
-        holder.delete.setOnClickListener {
+        holder.options.setOnClickListener {
             listener?.onRecyclerViewClickListener(it, item)
         }
     }
@@ -41,10 +43,10 @@ class DateAdapter : RecyclerView.Adapter<ItemViewHolder>() {
 class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     var userText = view.findViewById<TextView>(R.id.user_text)
     var userName = view.findViewById<TextView>(R.id.user_name)
-    val delete = view.findViewById<ImageView>(R.id.delete_icon)
-    private var auth: FirebaseAuth = Firebase.auth
+    val options = view.findViewById<ImageView>(R.id.option_icon)
+
     fun bind(item: DateItem) {
-        userName.text = auth.currentUser?.displayName.toString()
+        userName.text = item.userName
         userText.text = item.userText
     }
 }

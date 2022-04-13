@@ -1,29 +1,38 @@
 package teach.meskills.timetable.date
 
+import android.app.*
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
+import androidx.work.*
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import teach.meskills.timetable.*
+import teach.meskills.timetable.R
 import teach.meskills.timetable.databinding.DateFragmentBinding
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
 class DateFragment : BaseFragment(), RecyclerViewClickListener {
-    lateinit var auth: FirebaseAuth
+
     lateinit var adapter: DateAdapter
     private lateinit var binding: DateFragmentBinding
-    private val viewModel by viewModel<DateViewModel>()
-    val myRef = Firebase.database.getReference("message")
+    private val dateViewModel by viewModel<DateViewModel>()
+
     var year = 0
     var month = 0
     var day = 0
+    lateinit var nodeKey: String
+    var nodeFlag = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,82 +45,155 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        auth = Firebase.auth
+        nodeKey = ROOT_REFERENCE.push().key.toString()
         adapter = DateAdapter()
         adapter.listener = this
-        year = requireArguments().getInt("year")
-        month = requireArguments().getInt("month")
-        day = requireArguments().getInt("day")
+        year = requireArguments().getInt(YEAR_KEY)
+        month = requireArguments().getInt(MONTH_KEY)
+        day = requireArguments().getInt(DAY_KEY)
         binding.save.setOnClickListener {
             if (binding.editTextMessage.text.isNotEmpty()) {
-                myRef.child(myRef.push().key ?: "some text")
-                    .setValue(
-                        DateItem(
-                            auth.currentUser?.displayName,
-                            binding.editTextMessage.text.toString(),
-                            auth.currentUser?.uid,
-                            year, month, day
-                        )
+                if (!nodeFlag) {
+                    nodeKey = ROOT_REFERENCE.push().key.toString()
+                }
+                ROOT_REFERENCE.child(nodeKey).setValue(
+                    DateItem(
+                        AUTH.currentUser?.displayName,
+                        binding.editTextMessage.text.toString(),
+                        AUTH.currentUser?.uid,
+                        nodeKey, year, month +1 , day
                     )
+                )
                 binding.editTextMessage.text.clear()
+                dateViewModel.getEventsForDate(year, month, day)
+                nodeFlag = false
             } else {
-                showToast("Enter some text")
+                showToast(getString(R.string.enter_text))
             }
         }
-        onChangeListener(myRef)
+
         val layoutManager = LinearLayoutManager(requireContext())
         binding.dateRecycler.adapter = adapter
         binding.dateRecycler.layoutManager = layoutManager
+        dateViewModel.getEventsForDate(year, month, day)
+        dateViewModel.getHolidays()
+        dateViewModel.dateItemLiveData.observe(viewLifecycleOwner) {
+            adapter.dateItems = it
+        }
+        dateViewModel.holidaysToDateLiveData.observe(viewLifecycleOwner) {
+//            adapter.dateItems = it
+        }
+
     }
 
-    fun onChangeListener(dRef: DatabaseReference) {
-        dRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val list = ArrayList<DateItem>()
-                for (s in snapshot.children) {
-                    val item = s.getValue(DateItem::class.java)
-                    if (item != null) {
-                        if (item.dateYear == year &&
-                            item.dateMonth == month &&
-                            item.dateDay == day
-                        ) {
-                            item.userName = auth.currentUser?.displayName
-                            item.id = s.key
-                            item.let { list.add(item) }
-                        }
-                    }
-                }
-                adapter.dateItems = list
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.date -> {
+                item.title = "$day-$month-$year"
             }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
+            android.R.id.home -> {
+                parentFragmentManager.popBackStack()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onRecyclerViewClickListener(view: View, dateItem: DateItem) {
         val options = arrayOf<CharSequence>(
+            "Edit",
             "Delete",
+            "Add a notice",
             "Cancel"
         )
-        val builder = android.app.AlertDialog.Builder(view.context)
-        builder.setTitle("Delete Content")
+        val builder = AlertDialog.Builder(view.context)
+        builder.setTitle(getString(R.string.options))
         builder.setItems(
             options
         ) { _, which ->
-            if (which == 0) {
-                viewModel.deleteItem(dateItem)
+            when (which) {
+                0 -> {
+                    binding.editTextMessage.setText(
+                        dateItem.userText
+                    )
+                    nodeFlag = true
+                    nodeKey = dateItem.id.toString()
+                }
+                1 -> {
+                    dateViewModel.deleteItem(dateItem)
+                }
+                2 -> {
+                    nodeKey = dateItem.id.toString()
+                    notification()
+                }
             }
         }
         builder.show()
     }
 
+    private fun createChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.notice)
+            val descriptionText = getString(R.string.description_notice)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val mChannel = NotificationChannel(NotificationWorker.CHANNEL_ID, name, importance)
+            mChannel.description = descriptionText
+            val notificationManager =
+                context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(mChannel)
+        }
+    }
+
+    fun createNotification(context: Context): Notification {
+        val pIntent = PendingIntent.getActivity(
+            context,
+            NotificationWorker.CONTENT_REQUEST_CODE,
+            MainActivity.startDateFragment(year, month, day),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(context, NotificationWorker.CHANNEL_ID)
+            .setContentTitle("Attention")
+            .setContentText("You have a message")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setSmallIcon(R.drawable.ic_baseline_notifications)
+            .setAutoCancel(true)
+            .setContentIntent(pIntent)
+            .build()
+        createChannel(context)
+        return notification
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun notification() {
+        val beginTime = LocalDateTime.of(year, month, day, 8, 30)
+        val endTime = LocalDateTime.of(year, month, day, 10, 0)
+        val timeInterval = ChronoUnit.MILLIS.between(beginTime, endTime)
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresStorageNotLow(true)
+            .build()
+        val myWorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .addTag(nodeKey)
+            .setInitialDelay(timeInterval, TimeUnit.MILLISECONDS)
+            .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(requireContext()).enqueue(myWorkRequest)
+    }
+
     companion object {
+        private const val YEAR_KEY = "year"
+        private const val MONTH_KEY = "month"
+        private const val DAY_KEY = "day"
 
         fun newInstance(year: Int, month: Int, day: Int) = DateFragment().apply {
             arguments = Bundle().apply {
-                putInt("year", year)
-                putInt("month", month)
-                putInt("day", day)
+                putInt(YEAR_KEY, year)
+                putInt(MONTH_KEY, month)
+                putInt(DAY_KEY, day)
             }
         }
     }

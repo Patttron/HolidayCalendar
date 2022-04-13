@@ -16,6 +16,10 @@ data class HolidaysEntity(
     val holidaysName: String,
     @ColumnInfo(name = "descriptions")
     val descriptions: String,
-    @ColumnInfo(name = "dateIso")
-    val dateIso: String
-): Parcelable
+    @ColumnInfo(name = "holidayDateDay")
+    val holidayDateDay: Int,
+    @ColumnInfo(name = "holidayDateMonth")
+    val holidayDateMonth: Int,
+    @ColumnInfo(name = "holidayDateYear")
+    val holidayDateYear: Int
+) : Parcelable

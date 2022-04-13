@@ -2,8 +2,11 @@ package teach.meskills.timetable
 
 import android.os.Bundle
 import android.view.*
+import android.widget.TextView
 import androidx.appcompat.app.ActionBar
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import teach.meskills.timetable.date.DateFragment
 
 open class BaseFragment: Fragment() {
 
@@ -17,7 +20,6 @@ open class BaseFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setHasOptionsMenu(true)
         val actionBar: ActionBar? = (activity as MainActivity?)!!.supportActionBar
         actionBar?.setHomeButtonEnabled(true)

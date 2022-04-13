@@ -9,7 +9,7 @@ class WorkTimetableApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@WorkTimetableApplication)
-            modules(contentRepository, holidayViewModel, dateItemViewModel)
+            modules(contentRepository, holidayViewModel, dateItemViewModel, contentDate)
         }
     }
 }

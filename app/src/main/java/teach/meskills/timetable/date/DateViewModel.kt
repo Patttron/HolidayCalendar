@@ -1,17 +1,53 @@
 package teach.meskills.timetable.date
 
+import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
 
-class DateViewModel : ViewModel() {
+import teach.meskills.timetable.ROOT_REFERENCE
+import teach.meskills.timetable.holidays.ContentRepository
+import java.lang.Exception
 
-private val myRef =   Firebase.database.getReference("message")
+class DateViewModel(
+    private val contentRepository: ContentRepository,
+    private val contentDate: DateRepository
+) : ViewModel() {
+
+    val holidaysToDateLiveData = MutableLiveData<List<DateItem>>()
+    private val scope = CoroutineScope(Dispatchers.Main)
+    var dateItemLiveData = MutableLiveData<List<DateItem>>()
+
 
     fun deleteItem(dateItem: DateItem) {
-        myRef.child(dateItem.id!!).removeValue()
+        ROOT_REFERENCE.child(dateItem.id!!).removeValue()
+    }
+
+    fun getHolidays() {
+        try {
+            scope.launch {
+                val response = withContext(Dispatchers.IO) {
+                    contentRepository.holidaysToCalendar()
+                }
+                holidaysToDateLiveData.value = response
+                Log.d("resp holidays live d1", response.toString())
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
+    fun getEventsForDate(year: Int, month: Int, day: Int) {
+        dateItemLiveData = contentDate.geEventForDate(year, month, day) as MutableLiveData<List<DateItem>>
+        Log.d("resp dateItem d2", dateItemLiveData.value.toString())
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        scope.cancel()
     }
 }
-
 
 
