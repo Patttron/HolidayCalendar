@@ -71,7 +71,7 @@ class SignInFragment : Fragment() {
                 Log.d("signin", "Google auth done")
             }
             else {
-                showToast("Some problem with connection")
+                showToast(getString(R.string.connection_problem))
                 Log.d("signin", "Google auth error")
             }
         }

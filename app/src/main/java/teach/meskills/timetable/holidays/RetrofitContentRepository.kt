@@ -1,10 +1,6 @@
 package teach.meskills.timetable.holidays
 
 import android.util.Log
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import teach.meskills.timetable.AUTH
@@ -51,6 +47,7 @@ class RetrofitContentRepository : ContentRepository {
             var nodeKey = ""
             val holidayMap2 = holidayService.loadMedia().response.holidays.map {
                 nodeKey = ROOT_REFERENCE.push().key.toString()
+
                 DateItem(
                     it.name, it.description,
                     AUTH.currentUser?.uid,
@@ -60,7 +57,9 @@ class RetrofitContentRepository : ContentRepository {
                     dateDay = it.date.datetime.day
                 )
             }
-            ROOT_REFERENCE.setValue(holidayMap2)
+            for (i in holidayMap2){
+                ROOT_REFERENCE.child(i.key.toString()).setValue(i)
+            }
             Log.d("responHoliday1", holidayMap2.toString())
             holidayMap2
         } catch (e: java.lang.Exception) {

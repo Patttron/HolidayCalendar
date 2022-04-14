@@ -7,11 +7,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import teach.meskills.timetable.ROOT_REFERENCE
 
 class DateRepository(private val dRef: DatabaseReference) {
 
-    var nodeKey = ROOT_REFERENCE.push().key.toString()
     val liveData = MutableLiveData<List<DateItem>>()
 
     fun geEventForDate(year: Int, month: Int, day: Int): LiveData<List<DateItem>> {
@@ -22,10 +20,9 @@ class DateRepository(private val dRef: DatabaseReference) {
                     val item = s.getValue(DateItem::class.java)
                     if (item != null) {
                         if (item.dateYear == year &&
-                            item.dateMonth == month +1 &&
+                            item.dateMonth == month &&
                             item.dateDay == day
                         ) {
-
                             item.id = s.key
                             item.let { list.add(item) }
                         }

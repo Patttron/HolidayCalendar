@@ -11,4 +11,6 @@
     <string name="show_date">date</string>
     <string name="notice">Notice</string>
     <string name="description_notice">Notice information</string>
+    <string name="connection_problem">Some problem with connection</string>
+    <string name="you_have_message">You have a message</string>
 </resources>

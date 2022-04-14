@@ -6,13 +6,10 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.ActionBar
 import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.*
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import teach.meskills.timetable.*
 import teach.meskills.timetable.R
@@ -26,12 +23,11 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
     lateinit var adapter: DateAdapter
     private lateinit var binding: DateFragmentBinding
     private val dateViewModel by viewModel<DateViewModel>()
-
     var year = 0
     var month = 0
     var day = 0
     lateinit var nodeKey: String
-    var nodeFlag = false
+    private var nodeFlag = false
 
 
     override fun onCreateView(
@@ -49,8 +45,10 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
         adapter = DateAdapter()
         adapter.listener = this
         year = requireArguments().getInt(YEAR_KEY)
-        month = requireArguments().getInt(MONTH_KEY)
+        month = requireArguments().getInt(MONTH_KEY) + 1
         day = requireArguments().getInt(DAY_KEY)
+        val actionBar: ActionBar? = (activity as MainActivity?)!!.supportActionBar
+        actionBar?.title = "$day-$month-$year"
         binding.save.setOnClickListener {
             if (binding.editTextMessage.text.isNotEmpty()) {
                 if (!nodeFlag) {
@@ -61,7 +59,7 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
                         AUTH.currentUser?.displayName,
                         binding.editTextMessage.text.toString(),
                         AUTH.currentUser?.uid,
-                        nodeKey, year, month +1 , day
+                        nodeKey, year, month, day
                     )
                 )
                 binding.editTextMessage.text.clear()
@@ -71,33 +69,13 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
                 showToast(getString(R.string.enter_text))
             }
         }
-
         val layoutManager = LinearLayoutManager(requireContext())
         binding.dateRecycler.adapter = adapter
         binding.dateRecycler.layoutManager = layoutManager
         dateViewModel.getEventsForDate(year, month, day)
-        dateViewModel.getHolidays()
         dateViewModel.dateItemLiveData.observe(viewLifecycleOwner) {
             adapter.dateItems = it
         }
-        dateViewModel.holidaysToDateLiveData.observe(viewLifecycleOwner) {
-//            adapter.dateItems = it
-        }
-
-    }
-
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        when (item.itemId) {
-            R.id.date -> {
-                item.title = "$day-$month-$year"
-            }
-            android.R.id.home -> {
-                parentFragmentManager.popBackStack()
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -154,8 +132,8 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
             PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(context, NotificationWorker.CHANNEL_ID)
-            .setContentTitle("Attention")
-            .setContentText("You have a message")
+            .setContentTitle(getString(R.string.attention))
+            .setContentText(getString(R.string.you_have_message))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setSmallIcon(R.drawable.ic_baseline_notifications)
             .setAutoCancel(true)
@@ -164,7 +142,6 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
         createChannel(context)
         return notification
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun notification() {

@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
-
 import teach.meskills.timetable.ROOT_REFERENCE
 import teach.meskills.timetable.holidays.ContentRepository
 import java.lang.Exception
@@ -17,6 +16,7 @@ class DateViewModel(
     val holidaysToDateLiveData = MutableLiveData<List<DateItem>>()
     private val scope = CoroutineScope(Dispatchers.Main)
     var dateItemLiveData = MutableLiveData<List<DateItem>>()
+    var holidayDownloadFlag = MutableLiveData<Boolean>()
 
 
     fun deleteItem(dateItem: DateItem) {
@@ -24,20 +24,22 @@ class DateViewModel(
     }
 
     fun getHolidays() {
-        try {
-            scope.launch {
-                val response = withContext(Dispatchers.IO) {
-                    contentRepository.holidaysToCalendar()
-                }
-                holidaysToDateLiveData.value = response
-                Log.d("resp holidays live d1", response.toString())
-            }
 
+        try {
+            if (holidayDownloadFlag.value == null || holidayDownloadFlag.value == false) {
+                scope.launch {
+                    val response = withContext(Dispatchers.IO) {
+                        contentRepository.holidaysToCalendar()
+                    }
+                    holidaysToDateLiveData.value = response
+                    holidayDownloadFlag.value = true
+                    Log.d("resp holidays live d1", response.toString())
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
-
 
     fun getEventsForDate(year: Int, month: Int, day: Int) {
         dateItemLiveData = contentDate.geEventForDate(year, month, day) as MutableLiveData<List<DateItem>>

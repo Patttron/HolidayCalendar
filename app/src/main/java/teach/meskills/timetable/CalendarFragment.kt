@@ -1,19 +1,23 @@
 package teach.meskills.timetable
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import teach.meskills.timetable.databinding.CalendarFragmentBinding
 import teach.meskills.timetable.date.DateFragment
+import teach.meskills.timetable.date.DateViewModel
 import teach.meskills.timetable.holidays.HolidaysFragment
 import kotlin.system.exitProcess
 
 class CalendarFragment : Fragment() {
 
     lateinit var binding: CalendarFragmentBinding
+    private val dateViewModel by viewModel<DateViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +49,11 @@ class CalendarFragment : Fragment() {
                 .replace(R.id.fragmentContainer, DateFragment.newInstance(year, month, dayOfMonth))
                 .addToBackStack(null)
                 .commit()
+        }
+        if(dateViewModel.holidayDownloadFlag.value == null) {
+            dateViewModel.getHolidays() //загружаем праздники
+            dateViewModel.holidayDownloadFlag.value = true
+            Log.d("resp holi flag", dateViewModel.holidayDownloadFlag.toString())
         }
     }
 

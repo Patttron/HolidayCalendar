@@ -3,9 +3,6 @@ package teach.meskills.timetable.holidays
 import android.os.Bundle
 import android.view.*
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import teach.meskills.timetable.BaseFragment
 import teach.meskills.timetable.databinding.HolidaysFragmentBinding
