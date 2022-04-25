@@ -63,7 +63,6 @@ class DateFragment : BaseFragment(), RecyclerViewClickListener {
                     )
                 )
                 binding.editTextMessage.text.clear()
-                dateViewModel.getEventsForDate(year, month, day)
                 nodeFlag = false
             } else {
                 showToast(getString(R.string.enter_text))

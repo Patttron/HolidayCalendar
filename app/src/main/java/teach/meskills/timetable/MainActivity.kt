@@ -29,8 +29,9 @@ class MainActivity : AppCompatActivity() {
                         intent.getIntExtra(YEAR_KEY, 0),
                         intent.getIntExtra(MONTH_KEY, 0),
                         intent.getIntExtra(DAY_KEY, 0)
-                    ))
-                        .commit()
+                    )
+                )
+                .commit()
         }
     }
 
@@ -58,9 +59,9 @@ class MainActivity : AppCompatActivity() {
         private const val MONTH_KEY = "month"
         private const val DAY_KEY = "day"
 
-        fun startDateFragment(year: Int, month: Int, day: Int): Intent {
-            return Intent(ACTION).putExtra(YEAR_KEY, year)
+        fun startDateFragment(year: Int, month: Int, day: Int) =
+            Intent(ACTION).putExtra(YEAR_KEY, year)
                 .putExtra(MONTH_KEY, month).putExtra(DAY_KEY, day)
-        }
+
     }
 }

@@ -11,7 +11,6 @@ class RetrofitContentRepository : ContentRepository {
 
     private val holidayService: HolidayService
 
-
     init {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://calendarific.com/")
@@ -47,17 +46,17 @@ class RetrofitContentRepository : ContentRepository {
             var nodeKey = ""
             val holidayMap2 = holidayService.loadMedia().response.holidays.map {
                 nodeKey = ROOT_REFERENCE.push().key.toString()
-
                 DateItem(
-                    it.name, it.description,
-                    AUTH.currentUser?.uid,
-                    nodeKey,
+                    userName = it.name,
+                    userText = it.description,
+                    id = AUTH.currentUser?.uid,
+                    key = nodeKey,
                     dateYear = it.date.datetime.year,
                     dateMonth = it.date.datetime.month,
                     dateDay = it.date.datetime.day
                 )
             }
-            for (i in holidayMap2){
+            for (i in holidayMap2) {
                 ROOT_REFERENCE.child(i.key.toString()).setValue(i)
             }
             Log.d("responHoliday1", holidayMap2.toString())

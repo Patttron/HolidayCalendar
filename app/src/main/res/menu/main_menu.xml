@@ -6,9 +6,4 @@
         android:id="@+id/log_out"
         android:title="@string/log_out" />
 
-    <item
-        android:id="@+id/date"
-        android:title=""
-        app:showAsAction="always" />
-
 </menu>

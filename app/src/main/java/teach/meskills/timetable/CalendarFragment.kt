@@ -1,5 +1,6 @@
 package teach.meskills.timetable
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -18,6 +19,9 @@ class CalendarFragment : Fragment() {
 
     lateinit var binding: CalendarFragmentBinding
     private val dateViewModel by viewModel<DateViewModel>()
+    private val preference by lazy {
+        requireContext().getSharedPreferences("teach.login.anton", Context.MODE_PRIVATE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,6 +35,13 @@ class CalendarFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (preference.contains(HOLIDAYDOWNLOADFLAG)) {
+            dateViewModel.holidayDownloadFlag.value = true
+        }
+        if (dateViewModel.holidayDownloadFlag.value != true) {
+            dateViewModel.getHolidays(requireContext())
+        }
+//        dateViewModel.getHolidays(requireContext())
         setHasOptionsMenu(true)
         val actionBar: ActionBar? = (activity as MainActivity?)!!.supportActionBar
         actionBar?.setHomeButtonEnabled(true)
@@ -50,11 +61,6 @@ class CalendarFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
-        if(dateViewModel.holidayDownloadFlag.value == null) {
-            dateViewModel.getHolidays() //загружаем праздники
-            dateViewModel.holidayDownloadFlag.value = true
-            Log.d("resp holi flag", dateViewModel.holidayDownloadFlag.toString())
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -71,7 +77,6 @@ class CalendarFragment : Fragment() {
                     .replace(R.id.fragmentContainer, SignInFragment.newInstance())
                     .commit()
             }
-            R.id.date -> {item.isVisible = false}
             android.R.id.home -> {
                 AlertDialog.Builder(requireContext()).apply {
                     setTitle(getString(R.string.attention))
@@ -90,10 +95,11 @@ class CalendarFragment : Fragment() {
                 }.create().show()
             }
         }
-            return super.onOptionsItemSelected(item)
-        }
-
-        companion object {
-            fun newInstance() = CalendarFragment()
-        }
+        return super.onOptionsItemSelected(item)
     }
+
+    companion object {
+        const val HOLIDAYDOWNLOADFLAG = "flag"
+        fun newInstance() = CalendarFragment()
+    }
+}
